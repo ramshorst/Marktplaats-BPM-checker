@@ -14,7 +14,8 @@ function doTheWork() {
   // })
   .then((urls) => {
     urls.forEach(url => {
-      crawl(url).then(() => {
+      crawl(url).then((car) => {
+        printCar(car);
         // send email
         // for later us: client.set("string key", "string val", redis.print);
       });
@@ -22,9 +23,22 @@ function doTheWork() {
   })
 }
 
+function printCar (car) {
+  if (result.discount >= 20) {
+    var color = console.log(clc.white(car));
+  } else if (result.discount >= 30) {
+    var color = console.log(clc.orange(car));
+  } else if (result.discount >= 40) {
+    var color = console.log(clc.yellow(car));
+  } else if (result.discount >= 50) {
+    var color = console.log(clc.green(car));
+  }
+  console.log(`clc.${color}(car)`);
+}
+
 function getUrlsFromPage(pageNumber) {
   return new Promise((resolve, reject) => {
-    const startUrl = 'https://www.marktplaats.nl/z/auto-s/volvo.html?query=volvo&categoryId=91&attributes=S%2C10898&priceFrom=4.000%2C00&yearFrom=2006' + '&currentPage=' + pageNumber;
+    const startUrl = 'https://www.marktplaats.nl/z/auto-s/volvo-v70.html?query=volvo%20v70&categoryId=91&priceFrom=500%2C00&yearFrom=2005&attributes=S%2C474&attributes=N%2C188&startDateFrom=always' + '&currentPage=' + pageNumber;
     const resultUrls = [];
 
     request(startUrl, function (error, response, body) {
@@ -77,9 +91,7 @@ function crawl(url) {
              url: car.url.split("?")[0]
            }
            resolve(carObject);
-         }).catch(e) {
-           reject(e);
-         };
+         })
     });
   });
 }
