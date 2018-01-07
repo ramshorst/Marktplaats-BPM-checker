@@ -1,0 +1,20 @@
+{
+  "name": "scrape",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scrape.js",
+  "scripts": {
+    "start": "node scrape.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "async": "^2.6.0",
+    "cheerio": "^1.0.0-rc.2",
+    "cli-color": "^1.2.0",
+    "nightmare": "^2.10.0",
+    "redis": "^2.8.0",
+    "request": "^2.83.0"
+  },
+  "dependencies": {}
+}
