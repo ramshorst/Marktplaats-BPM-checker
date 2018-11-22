@@ -2,12 +2,12 @@ const cheerio = require('cheerio')
 const request = require('request');
 const async = require('async');
 const Nightmare = require('nightmare');
-const clc = require('cli-color');
+const color = require('cli-color');
 const redis = require("redis");
 client = redis.createClient();
 
 function doTheWork() {
-  getUrlsFromPage(1)
+  getUrlsFromPage(7)
   // .then(urls => {
   //   // check in reddis if url exists
   //   // return filtered array
@@ -24,21 +24,21 @@ function doTheWork() {
 }
 
 function printCar (car) {
-  if (result.discount >= 20) {
-    var color = console.log(clc.white(car));
-  } else if (result.discount >= 30) {
-    var color = console.log(clc.orange(car));
-  } else if (result.discount >= 40) {
-    var color = console.log(clc.yellow(car));
-  } else if (result.discount >= 50) {
-    var color = console.log(clc.green(car));
+  display = '-' + car.discount + '% €' + car.price + ' ' + car.url;
+  if (car.discount <= 10) {
+    return console.log(color.white(display));
+  } else if (car.discount <= 30) {
+    return console.log(color.yellow(display));
+  } else if (car.discount <= 40) {
+    return console.log(color.orange.bold(display));
+  } else {
+    return console.log(color.green.bold(display));
   }
-  console.log(`clc.${color}(car)`);
 }
 
 function getUrlsFromPage(pageNumber) {
   return new Promise((resolve, reject) => {
-    const startUrl = 'https://www.marktplaats.nl/z/auto-s/volvo-v70.html?query=volvo%20v70&categoryId=91&priceFrom=500%2C00&yearFrom=2005&attributes=S%2C474&attributes=N%2C188&startDateFrom=always' + '&currentPage=' + pageNumber;
+    const startUrl = 'https://www.marktplaats.nl/z/auto-s.html?categoryId=91&attributes=S%2C10898&priceTo=15.000%2C00&yearFrom=2006&attributes=N%2C186&attributes=N%2C187&startDateFrom=always' + '&currentPage=' + pageNumber;
     const resultUrls = [];
 
     request(startUrl, function (error, response, body) {
