@@ -3,17 +3,18 @@ const request = require('request');
 const async = require('async');
 const Nightmare = require('nightmare');
 const color = require('cli-color');
-const redis = require("redis");
-client = redis.createClient();
+//const redis = require("redis");
+//client = redis.createClient();
 
 function doTheWork() {
-  getUrlsFromPage(7)
+  getUrlsFromPage()
   // .then(urls => {
   //   // check in reddis if url exists
   //   // return filtered array
   // })
   .then((urls) => {
     urls.forEach(url => {
+      //return console.log(url);
       crawl(url).then((car) => {
         printCar(car);
         // send email
@@ -24,28 +25,33 @@ function doTheWork() {
 }
 
 function printCar (car) {
-  display = '-' + car.discount + '% €' + car.price + ' ' + car.url;
-  if (car.discount <= 10) {
-    return console.log(color.white(display));
-  } else if (car.discount <= 30) {
-    return console.log(color.yellow(display));
-  } else if (car.discount <= 40) {
-    return console.log(color.orange.bold(display));
-  } else {
-    return console.log(color.green.bold(display));
+  if(car.price < 10000 && car.price > 2000) {
+    display = '-' + car.discount + '% €' + car.price + ' ' + car.url;
+    if (car.discount <= 10) {
+      return console.log(color.white(display));
+    } else if (car.discount <= 30) {
+      return console.log(color.yellow(display));
+    } else if (car.discount <= 40) {
+      return console.log(color.orange.bold(display));
+    } else {
+      return console.log(color.green.bold(display));
+    }
   }
 }
 
-function getUrlsFromPage(pageNumber) {
+function getUrlsFromPage() {
   return new Promise((resolve, reject) => {
-    const startUrl = 'https://www.marktplaats.nl/z/auto-s.html?categoryId=91&attributes=S%2C10898&priceTo=15.000%2C00&yearFrom=2006&attributes=N%2C186&attributes=N%2C187&startDateFrom=always' + '&currentPage=' + pageNumber;
+    const startUrl = 'https://www.marktplaats.nl/l/auto-s/volvo/f/v70+benzine/1283+473/#PriceCentsFrom:150000|PriceCentsTo:700000|constructionYearFrom:2006|distanceMeters:75000|postcode:3511PM';
     const resultUrls = [];
 
     request(startUrl, function (error, response, body) {
+      //return console.log(error);
       let $ = cheerio.load(body);
       //console.log($('.listing-table-mobile-link'));
-      $('.listing-table-mobile-link').each(function () {
-        resultUrls.push(this.attribs.href);
+      $('.mp-Listing-coverLink').each(function () {
+        if(this.attribs.href !== undefined) {
+          resultUrls.unshift('https://www.marktplaats.nl' + this.attribs.href);
+        }
       });
       resolve(resultUrls);
     });
@@ -56,13 +62,21 @@ function crawl(url) {
   return new Promise((resolve, reject) => {
     request(url, function (error, response, body) {
       let $ = cheerio.load(body);
-      const nightmare = Nightmare({ show: false });
+      const nightmare = Nightmare({ show: true });
+
+      let kenteken = "";
+        for (let i = 0; i< 6; i++) {
+          if ($('.key').eq(i).text() === 'Kenteken:') {
+            kenteken = $('.value').eq(i).text();
+            break;
+          }
+        }
 
       const car = {
         url,
         response: response && response.statusCode,
         error: error,
-        number_plate: $('.value').eq(3).text(),
+        number_plate: kenteken,
         price: $('.price').eq(0).text().replace(/[^0-9,-]+/g,"").replace(',', '.'),
         year: $('.trust-item-value').eq(0).text(),
         km: $('.value').eq(7).text(),
